@@ -202,12 +202,15 @@ export default {
   },
   methods:{
     open() {
+      console.log('open')
       const left = document.querySelector('#left-divider')
       if (left) {
         left.style.display = 'none'
       }
      },
     close() {
+      console.log('close')
+
       const left = document.querySelector('#left-divider')
       if (left) {
         left.style.display = 'block'
