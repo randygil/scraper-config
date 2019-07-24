@@ -237,8 +237,9 @@ export default {
          zone.dates = zone.dates.map((date) => {
           return new Date(date)
         })
+        this.editedItem = Object.assign(zone, {}) 
+
       }
-      this.editedItem = Object.assign(zone, {}) 
       // JSON.parse(JSON.stringify(zone || {}))
    
       this.$refs['edit'].show()
