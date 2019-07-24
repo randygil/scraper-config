@@ -11,7 +11,6 @@
        @ok="save"
        @show="open()"
        @hide="close()"
-       
        >
         <b-card
         >
