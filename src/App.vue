@@ -9,6 +9,8 @@
        id="config"
        size="lg"
        @ok="save"
+       @show="open()"
+       @hide="close()"
        
        >
         <b-card
@@ -26,6 +28,19 @@
                 ></b-form-radio-group>
               </b-form-group>
             </b-row>
+
+            <b-row>
+              <b-form-group label="Intervalo:">
+                <b-form-input
+                  v-model="config.interval"
+                  type="number"
+                   placeholder="Intervalo en segundos"
+                > 
+
+                </b-form-input>
+              </b-form-group>
+            </b-row>
+
             <b-row>
               
                 <b-col md="2" class=" "><p>Zonas:</p></b-col>
@@ -94,6 +109,7 @@
         >
 
         <template v-if="editedItem">
+          
           <b-row class="mb-3">
             <b-col sm="3">
                 <label for="zipcode">Nombre:</label>
@@ -150,6 +166,17 @@
                 </b-col>
             </b-row>
         </template>
+
+        <div slot="modal-footer" class="w-100">
+            <b-button
+              variant="primary"
+              size="sm"
+              class="float-right"
+              @click="$refs['edit'].hide()"
+            >
+              Cerrar
+            </b-button>
+          </div>
       </b-modal>
    
   </div>
@@ -173,7 +200,19 @@ export default {
       editedItem: {}
     }
   },
-  methods:{ 
+  methods:{
+    open() {
+      const left = document.querySelector('#left-divider')
+      if (left) {
+        left.style.display = 'none'
+      }
+     },
+    close() {
+      const left = document.querySelector('#left-divider')
+      if (left) {
+        left.style.display = 'block'
+      }
+    },
     initialize() {
       const config = JSON.parse(localStorage.getItem('config')) || this.config
       this.config = config
@@ -189,8 +228,15 @@ export default {
     },
     showEdit(zone) {
     
+      
       this.editedIndex = this.config.zones.indexOf(zone)
-      this.editedItem = JSON.parse(JSON.stringify(zone || {}))
+      if (zone) { 
+         zone.dates = zone.dates.map((date) => {
+          return new Date(date)
+        })
+      }
+      this.editedItem = Object.assign(zone, {}) 
+      // JSON.parse(JSON.stringify(zone || {}))
    
       this.$refs['edit'].show()
     },

@@ -11,7 +11,13 @@ Vue.use(VCalendar, {
   firstDayOfWeek: 2  // Monday
                // ...other defaults
 });
-new Vue({
-  el: '#app',
-  render: h => h(App)
-})
+
+
+ // This works fine
+ const body = document.querySelector('body');
+ let vueContainer = document.createElement('div')
+ body.appendChild(vueContainer);
+  const app = new Vue({
+    render: h => h(App)
+  })
+  app.$mount(vueContainer);
