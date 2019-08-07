@@ -27,13 +27,21 @@ function cssElement(url) {
 
 
 let fillTable
-const DEBUG = false;
+const DEBUG = true;
 
 (function() {
 
 
     let STOP = false
-    const CONFIG = JSON.parse(localStorage.getItem('config'))
+    let CONFIG = JSON.parse(localStorage.getItem('config'))
+
+    if (!CONFIG) {
+       CONFIG = {
+          appliance: '',
+          paymentMethod: '',
+          zones: []
+       }
+    }
 
 
 
@@ -69,7 +77,6 @@ const DEBUG = false;
 
     let list = []
     let jobs = $("#availablejobs").children('.left.even')
-
     $.each(jobs,function(a,e) {
 
         let content = $(e).first().children('.span-12').first()
@@ -105,7 +112,7 @@ const DEBUG = false;
 
         if (zone.status) {
             let configs = zone.zipcode.split('\n')
-        
+
             filtersZone = filtersZone.concat(configs)
         }
     }
@@ -118,9 +125,12 @@ const DEBUG = false;
     if (DEBUG) {
         list = [
             {
+                job: '123123',
                 appliance: 'Refrigerator (Side By Side)',
                 location: ' ...terrace, doral Florida 33178',
-                paymentMethod: 'credit card'
+                paymentMethod: 'credit card',
+                schedule: 'August 8, 2019 9 AM-11 AM',
+                symptoms: 'prueba de simtomas'
             }
         ]
     }
@@ -179,6 +189,7 @@ const DEBUG = false;
     let jobsList = localStorage.getItem('jobs') ? JSON.parse(localStorage.getItem('jobs')) : [];
 
     if (status == 'Activo' && isEnabled()) {
+        console.log('activo')
         let matches = []
 
         let elements = list.filter((elem, index) => {
@@ -188,26 +199,51 @@ const DEBUG = false;
             let zipCodeMatch = CONFIG.zones.find((zone) => {
                 if (zone && zone.status) {
 
-                   const find = zone.dates.filter((date) => {
+                   
+
+
+                    let f = elem.schedule
+
+
+                    let month = f.split(',')[0].split(' ')[0]
+                    let day = f.split(',')[0].split(' ')[1]
+                    let year = f.split(',')[1].trim().split(' ')[0]
+                    let hourA = parseInt(f.split(',')[1].trim().split(' ')[1])
+                    let ttA = f.split(',')[1].trim().split(' ')[2].split('-')[0].replace('NN', 'PM')
+                    if (ttA == 'PM') {
+                        hourA +=12
+                    }
+                    let hourB = parseInt(f.split(',')[1].trim().split(' ')[2].split('-')[1])
+                    let ttB =  f.split(',')[1].trim().split(' ')[3].replace('NN', 'PM')
+                    if (ttB == 'PM') {
+                        hourB +=12
+                    }
+                    console.log('hourA', hourA)
+                    hourA = new Date(`${year}-${month}-${day} ${hourA}:00`)
+                    hourB = new Date(`${year}-${month}-${day} ${hourB}:00`)
+
+                    let from = new Date(`${year}-${month}-${day}`)
+                    from.setHours(zone.timeStart.split(':')[0])
+                    from.setMinutes(zone.timeStart.split(':')[1])
+
+                    let to = new Date(`${year}-${month}-${day}`)
+                    to.setHours(zone.timeEnd.split(':')[0])
+                    to.setMinutes(zone.timeEnd.split(':')[1])
+                    const today = new Date()
+                        console.log(`${hourA} >= ${from} && ${hourA} <= ${to} && ${hourB} <= ${to}`)
+
+                    if (!(hourA >= from && hourA <= to && hourB <= to )) {
+                        return false
+                    }
+
+                    const find = zone.dates.filter((date) => {
                         date = dateToString(new Date(date))
-                        return date == dateToString(new Date())
+                        return date == dateToString(hourB)
                       })
 
                    if (find[0]) {
                        return false
                    }
-
-                    let from = new Date()
-                    from.setHours(zone.timeStart.split(':')[0])
-                    from.setMinutes(zone.timeStart.split(':')[1])
-
-                    let to = new Date()
-                    to.setHours(zone.timeEnd.split(':')[0])
-                    to.setMinutes(zone.timeEnd.split(':')[1])
-                    const today = new Date()
-                    if (!(today >= from && today <= to)) {
-                        return false
-                    }
                     const zipcodes = zone.zipcode.split('\n')
 
                     let findzipCodeMatch = zipcodes.find((zipcode) => {
@@ -282,6 +318,22 @@ const DEBUG = false;
 
             localjobs.unshift(job)
             localStorage.setItem('jobsAccepted', JSON.stringify(localjobs) );
+            let url = DEBUG ? 'http://localhost:8000/notify.php' : 'http://localhost/scraper/notify.php'
+            const data = {
+               action: 'jobAccepted',
+               ...job
+            }
+
+
+            fetch(url,{
+                method: 'post',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data),
+            }).then((e) => {
+              e.text()
+            }).then((e) => {
+               console.log(e)
+            })
 
                if (!DEBUG) {
                    $('#book-'+elements[0].job).submit();
@@ -330,12 +382,15 @@ const DEBUG = false;
         ${tableContent}
 <button class="w3-btn w3-black" id="prevPage" >Atras</button>
 <button class="w3-btn w3-black" id="nextPage" >Siguiente</button>
+<button class="w3-btn w3-black" id="descargarCsv" >Exportar</button>
+
       </div>
     </div>
   </div>
 
 
 `;
+
     $("body").prepend('<a class="btn btn-success" href="" id="openHistorial">Ver historial</a>')
 
     $("#openHistorial").click(function(event) {
@@ -368,6 +423,46 @@ const DEBUG = false;
        $("#jobsList").html(tableContent)
     }
     }
+
+    function downloadCsv() {
+       let csv = ''
+       const items = jobsList
+        csv += `Job N°, Schedule, Location, Appliance, Payment Method, Symptons \r\n`
+
+       // Loop the array of objects
+       console.log(items.length)
+       for(let row = 0; row < items.length; row++){
+           let keysAmount = Object.keys(items[row]).length
+           let keysCounter = 0
+
+           
+          
+           
+           
+
+               let j = items[row]
+               if (!j.match) {
+                   j.match = {}
+               }
+               let fila = `${j.job}, ${j.schedule},${j.location} ${j.match.location ? `(${j.match.location})` : ''}, ${j.appliance} ${j.match.appliance ? `(${j.match.appliance})` : ''}, ${j.paymentMethod} ${j.match.paymentMethod ? `(${j.match.paymentMethod})` : ''}, ${j.symptoms}`
+               csv += fila + '\r\n'
+               keysCounter++
+           
+
+
+           keysCounter = 0
+       }
+
+        // Once we are done looping, download the .csv by creating a link
+        let link = document.createElement('a')
+        link.id = 'download-csv'
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+        link.setAttribute('download', 'export-jobs.csv');
+        document.body.appendChild(link)
+        document.querySelector('#download-csv').click()
+
+    }
+
     $('body').prepend(modalhtml)
     let pageNumber = 1
     $("#prevPage").click(function() {
@@ -381,4 +476,9 @@ const DEBUG = false;
            fillTable(pageNumber)
     });
     fillTable(pageNumber)
+      $('#descargarCsv').click(function(e) {
+        e.preventDefault();
+        console.log('click')
+        downloadCsv()
+    });
 })();
