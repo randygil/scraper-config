@@ -27,7 +27,7 @@ function cssElement(url) {
 
 
 let fillTable
-const DEBUG = true;
+const DEBUG = false;
 
 (function() {
 
@@ -193,7 +193,7 @@ const DEBUG = true;
                         return date == dateToString(new Date())
                       })
 
-                   if (!find[0]) {
+                   if (find[0]) {
                        return false
                    }
 
