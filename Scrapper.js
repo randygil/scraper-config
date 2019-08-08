@@ -209,12 +209,23 @@ const DEBUG = true;
                     let day = f.split(',')[0].split(' ')[1]
                     let year = f.split(',')[1].trim().split(' ')[0]
                     let hourA = parseInt(f.split(',')[1].trim().split(' ')[1])
-                    let ttA = f.split(',')[1].trim().split(' ')[2].split('-')[0].replace('NN', 'PM')
+                    let ttA = f.split(',')[1].trim().split(' ')[2].split('-')[0]
+
+                    if (ttA == 'NN') {
+                       hourA = 0;
+                        ttA = 'PM'
+                    }
                     if (ttA == 'PM') {
                         hourA +=12
                     }
                     let hourB = parseInt(f.split(',')[1].trim().split(' ')[2].split('-')[1])
-                    let ttB =  f.split(',')[1].trim().split(' ')[3].replace('NN', 'PM')
+                    let ttB =  f.split(',')[1].trim().split(' ')[3]
+
+
+                    if (ttB == 'NN') {
+                       hourB = 0;
+                       ttB = 'PM'
+                    }
                     if (ttB == 'PM') {
                         hourB +=12
                     }
