@@ -227,7 +227,8 @@
 </template>
 
 <script>
-
+const axios = require('axios')
+const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3333/api' : 'http://localhost:3333/api'
 export default {
   name: 'app',
   data () {
@@ -240,7 +241,9 @@ export default {
       events: [],
       saved: false,
       editedIndex: null,
-      editedItem: {}
+      editedItem: {
+        dates: []
+      }
     }
   },
   methods:{
@@ -260,8 +263,10 @@ export default {
       }
     },
     initialize() {
-      const config = JSON.parse(localStorage.getItem('config')) || this.config
-      this.config = config
+      let config = axios.get(`${baseURL}/config`).then((config) => {
+        this.config = config.data
+        console.log('config', config)
+      })
     },
 
     deleteItem(zone) {
@@ -269,20 +274,29 @@ export default {
       this.$delete(this.config.zones, index)
     },
     save() {
-      localStorage.setItem('config', JSON.stringify(this.config))
-      console.log(JSON.parse(localStorage.getItem('config')))
+      //localStorage.setItem('config', JSON.stringify(this.config))
+      //console.log(JSON.parse(localStorage.getItem('config')))
+      const { config } = this
+      let res = axios.post(`${baseURL}/config`, { data: config })
+        .then((res) => {
+          console.log('save', config)  
+        })
+      
     },
     showEdit(zone) {
-    
-      
-      this.editedIndex = this.config.zones.indexOf(zone)
+  
+      console.log('zone', zone)
       if (zone) { 
-         zone.dates = zone.dates.map((date) => {
-          return new Date(date)
-        })
+         this.editedIndex = this.config.zones.indexOf(zone)
+         if (zone.dates) {
+           zone.dates = zone.dates.map((date) => {
+            return new Date(date)
+          })
+         }
         this.editedItem = Object.assign(zone, {}) 
 
       }else {
+        this.editedIndex = -1
         this.editedItem = {}
       }
       // JSON.parse(JSON.stringify(zone || {}))
@@ -291,6 +305,9 @@ export default {
     },
     saveEdit() {
       if (this.editedIndex == -1) {
+        if (!this.config.zones) {
+            this.config.zones = []
+        }
         this.config.zones.push(this.editedItem)
       } else {
         this.config.zones.splice(this.editedIndex, 1, this.editedItem)
