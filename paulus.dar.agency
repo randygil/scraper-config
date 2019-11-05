@@ -1,0 +1,57 @@
+upstream paulus.dar.agency {
+  server localhost:3001;
+}
+
+server {
+ # root /var/www/paulus/.nuxt;
+
+ # index index.html index.htm index.js;
+
+  server_name paulus.dar.agency www.paulus.dar.agency;
+  access_log /var/log/nginx/paulus.dar.agency;
+  error_log /var/log/nginx/paulus.dar.agency debug;
+
+  location / {
+   # try_files $uri /index.js;
+
+    proxy_set_header Access-Control-Allow-Origin $http_origin; #CORS
+    proxy_set_header Access-Control-Allow-Methods 'GET, POST, OPTIONS, PUT, DELETE';
+    proxy_set_header Access-Control-Allow-Headers 'X-Requested-With,Accept,Content-Type, Origin';
+
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarder-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-NginX-Proxy true;
+
+    proxy_pass http://paulus.dar.agency;
+    proxy_redirect off;
+  }
+
+  location ~ /.well-known {
+    allow all;
+  }
+
+
+  listen [::]:443 ssl ipv6only=on; # managed by Certbot
+  listen 443 ssl; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/paulus.dar.agency/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/paulus.dar.agency/privkey.pem; # managed by Certbot
+  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = paulus.dar.agency) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        listen 80;
+        listen [::]:80;
+
+        server_name paulus.dar.agency www.paulus.dar.agency;
+    return 404; # managed by Certbot
+
+
+}
