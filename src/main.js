@@ -5,13 +5,20 @@ import '../plugins/boostrap-vue'
 
 import VCalendar from 'v-calendar';
 import 'v-calendar/lib/v-calendar.min.css';
+import VueNoty from 'vuejs-noty'
+
+Vue.use(VueNoty)
+import 'vuejs-noty/dist/vuejs-noty.css'
 
 // Use v-calendar, v-date-picker & v-popover components
 Vue.use(VCalendar, {
   firstDayOfWeek: 2  // Monday
                // ...other defaults
 });
-
+import axios from "axios"
+const baseURL =
+  process.env.NODE_ENV === "development" ? "http://localhost:3333/api" : "http://localhost:3333/api";
+axios.defaults.baseURL = baseURL
 
  // This works fine
  const body = document.querySelector('body');

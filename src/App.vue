@@ -1,7 +1,5 @@
 <template>
   <div id="app">
-    <b-button v-b-modal.config>Configurar Scraper</b-button>
-
     <b-modal
       title="Configurar scraper"
       ref="config"
@@ -31,21 +29,10 @@
           </b-row>
 
           <b-row>
-            <b-col sm="12">
-              <b-form-group label="Intervalo:">
-                <b-form-input
-                  v-model="config.interval"
-                  type="number"
-                  placeholder="Intervalo en segundos"
-                >
-                </b-form-input>
-              </b-form-group>
+            <b-col md="2" class>
+              <p>Zonas:</p>
             </b-col>
-          </b-row>
-
-          <b-row>
-            <b-col md="2" class=" "><p>Zonas:</p></b-col>
-            <b-col md="3" class="ml-auto ">
+            <b-col md="3" class="ml-auto">
               <b-button @click.prevent="showEdit()">Crear zona</b-button>
             </b-col>
           </b-row>
@@ -65,65 +52,27 @@
               </div>
               <div>
                 <b-button @click="showEdit(item)">Editar</b-button>
-                <b-button @click="deleteItem(item)" variant="danger"
-                  >Eliminar</b-button
-                >
+                <b-button @click="deleteItem(item)" variant="danger">Eliminar</b-button>
               </div>
             </b-list-group-item>
           </b-list-group>
-
-          <b-row class="mt-3">
-            <b-col sm="3">
-              <label for="appliance"
-                >Appliance ({{
-                  config.appliance ? config.appliance.split("\n").length : ""
-                }}):</label
-              >
-            </b-col>
-            <b-col sm="9">
-              <b-form-textarea
-                id="appliance"
-                v-model="config.appliance"
-                placeholder="Appliance"
-                rows="3"
-                maax-rows="6"
-              ></b-form-textarea>
-            </b-col>
-          </b-row>
-
-          <b-row class="mt-3">
-            <b-col sm="3">
-              <label for="appliance" v-if="config.paymentMethod"
-                >Métodos de pago ({{
-                  config.paymentMethod
-                    ? config.paymentMethod.split("\n").length
-                    : ""
-                }}
-                ):</label
-              >
-            </b-col>
-            <b-col sm="9">
-              <b-form-textarea
-                id="paymentMethod"
-                v-model="config.paymentMethod"
-                placeholder="Métodos de pago"
-                rows="3"
-                maax-rows="6"
-              ></b-form-textarea>
-            </b-col>
-          </b-row>
         </b-card-text>
       </b-card>
     </b-modal>
 
     <b-modal
       :title="editedIndex == -1 ? 'Nueva zona' : 'Editar zona'"
+      size="xl"
       ref="edit"
       id="edit"
     >
       <template v-if="editedItem">
         <b-row class="mb-3">
-          <b-col sm="12">
+          <b-col sm="9">
+            <b-form-label for="zipcode">Nombre:</b-form-label>
+            <b-form-input class="mt-2" v-model="editedItem.name" placeholder="Nombre"></b-form-input>
+          </b-col>
+          <b-col sm="3">
             <b-form-group label="Status:">
               <b-form-radio-group
                 id="btn-radios-1"
@@ -133,179 +82,207 @@
                   { text: 'Inactivo', value: ' ' }
                 ]"
                 buttons
-                button-variant="outline-primary"
+                :button-variant="editedItem.status === 'Activo' ? 'outline-success' : 'outline-primary'"
               ></b-form-radio-group>
             </b-form-group>
           </b-col>
         </b-row>
-        <b-row class="mb-3">
-          <b-col sm="3">
-            <label for="zipcode">Nombre:</label>
-          </b-col>
-          <b-col sm="9">
-            <b-form-input
-              v-model="editedItem.name"
-              placeholder="Nombre"
-            ></b-form-input>
-          </b-col>
-        </b-row>
+
         <b-row>
-          <b-col sm="3">
-            <label for="zipcode">Zipcodes:</label>
-          </b-col>
-          <b-col sm="9">
+          <b-col sm="12">
+            <b-form-label for="zipcode">Zipcodes:</b-form-label>
             <b-form-textarea
               id="zipcode"
               v-model="editedItem.zipcode"
               placeholder="Zipcodes"
               rows="3"
+              class="mt-1"
               maax-rows="6"
             ></b-form-textarea>
           </b-col>
         </b-row>
         <b-row class="mt-3">
-          <b-col sm="3">
-            <label for="zipcode">Fechas de activacion:</label>
-          </b-col>
-          <b-col sm="9">
+          <b-col sm="12">
+            <b-form-label for="zipcode">Fechas de activacion:</b-form-label>
             <v-date-picker mode="multiple" v-model="editedItem.dates">
-              <b-button>
-                Almanaque
-              </b-button>
+              <b-button>Almanaque</b-button>
             </v-date-picker>
           </b-col>
         </b-row>
 
         <b-row class="mt-3">
-          <b-col sm="3">
-            <label for="zipcode">Hora de inicio:</label>
+          <b-col sm="6">
+            <b-form-label for="zipcode">Hora de inicio:</b-form-label>
+            <b-form-input type="time" v-model="editedItem.timeStart" placeholder="Hora de inicio"></b-form-input>
           </b-col>
-          <b-col sm="9">
-            <b-form-input
-              type="time"
-              v-model="editedItem.timeStart"
-              placeholder="Hora de inicio"
-            ></b-form-input>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col sm="3">
-            <label for="zipcode">Hora de fin:</label>
-          </b-col>
-          <b-col sm="9">
-            <b-form-input
-              type="time"
-              v-model="editedItem.timeEnd"
-              placeholder="Hora de fin"
-            ></b-form-input>
+          <b-col sm="6">
+            <b-form-label for="zipcode">Hora de fin:</b-form-label>
+            <b-form-input type="time" v-model="editedItem.timeEnd" placeholder="Hora de fin"></b-form-input>
           </b-col>
         </b-row>
       </template>
 
+      <b-row class="mt-3">
+        <b-col sm="12">
+          <b-form-label for="appliance">
+            Appliance ({{
+            editedItem.appliance ? editedItem.appliance.split("\n").length : ""
+            }}):
+          </b-form-label>
+          <b-form-textarea
+            id="appliance"
+            v-model="editedItem.appliance"
+            placeholder="Appliance"
+            rows="3"
+            class="mt-1"
+            maax-rows="6"
+          ></b-form-textarea>
+        </b-col>
+      </b-row>
+
+      <b-row class="mt-3">
+        <b-col sm="12">
+          <b-form-label for="paymentMethod" v-if="editedItem.paymentMethod">
+            Métodos de pago ({{
+            editedItem.paymentMethod
+            ? editedItem.paymentMethod.split("\n").length
+            : ""
+            }}
+            ):
+          </b-form-label>
+          <b-form-textarea
+            id="paymentMethod"
+            v-model="editedItem.paymentMethod"
+            placeholder="Métodos de pago"
+            rows="3"
+            class="mt-1"
+            maax-rows="6"
+          ></b-form-textarea>
+        </b-col>
+      </b-row>
       <div slot="modal-footer" class="w-100">
         <b-button
           variant="primary"
           size="sm"
           :class="editedIndex != -1 ? 'float-right' : ''"
           @click="$refs['edit'].hide()"
-        >
-          Cerrar
-        </b-button>
+        >Cerrar</b-button>
 
         <b-button
           size="sm"
           class="ml-3 float-right"
+          :disabled="loading"
           @click="
             saveEdit();
             $refs['edit'].hide();
           "
           v-if="editedIndex == -1"
-        >
-          Guardar
-        </b-button>
+        >Guardar</b-button>
       </div>
     </b-modal>
 
-    <b-container>
+    <b-card>
+      <b-row class="mt-2">
+        <b-button variant="primary" @click="openConfig">Configurar Scraper</b-button>
+      </b-row>
       <b-row>
         <h1 class="text-center">Historial</h1>
       </b-row>
       <b-row class="mt-10">
-        <History :history="history"></History>
+        <History></History>
       </b-row>
-    </b-container>
+    </b-card>
   </div>
 </template>
 
 <script>
 import History from "./components/History";
-const axios = require("axios");
-console.log(process.env.NODE_ENV);
-const baseURL =
-  process.env.NODE_ENV === "development" ? "http://localhost:3333/api" : "/api";
+import axios from "axios";
 export default {
   name: "app",
   components: {
-    History
+    History,
   },
   data() {
     return {
+      loading: false,
       config: {
         appliance: "",
         zones: [],
-        status: "Inactivo"
+        status: "Inactivo",
       },
       events: [],
-      history: [],
       saved: false,
       editedIndex: null,
       editedItem: {
-        dates: []
-      }
+        dates: [],
+      },
     };
   },
   methods: {
     open() {
-      console.log("open");
       const left = document.querySelector("#left-divider");
       if (left) {
         left.style.display = "none";
       }
     },
     close() {
-      console.log("close");
-
       const left = document.querySelector("#left-divider");
       if (left) {
         left.style.display = "block";
       }
     },
     initialize() {
-      let config = axios.get(`${baseURL}/config`).then(config => {
-        this.config = config.data.config;
-        this.history = config.data.history;
-        console.log("config", config);
-      });
+      // let config = axios.get(`/config`).then(config => {
+      //   this.config = config.data.config;
+      // }).catch(error => {
+      //     this.$noty.error("Error al leer configuración")
+      // });
+    },
+
+    openConfig() {
+      let config = axios
+        .get(`/config`)
+        .then((config) => {
+          this.config = config.data.config;
+          this.$refs["config"].show();
+        })
+        .catch((error) => {
+          this.$noty.error("Error al leer configuración");
+        });
     },
 
     deleteItem(zone) {
       const index = this.config.zones.indexOf(zone);
       this.$delete(this.config.zones, index);
     },
-    save() {
+    save(event) {
+      event.preventDefault();
       //localStorage.setItem('config', JSON.stringify(this.config))
       //console.log(JSON.parse(localStorage.getItem('config')))
       const { config } = this;
-      let res = axios.post(`${baseURL}/config`, { data: config }).then(res => {
-        console.log("save", config);
-      });
+      this.loading = true;
+
+      const res = axios
+        .post(`/config`, { data: config })
+        .then(() => {
+          this.$noty.info("Configuración guardada");
+          this.$refs["config"].hide();
+        })
+        .catch((error) => {
+          this.$noty.error("Error al guardar configuración");
+        })
+        .finally(() => {
+          this.initialize();
+          this.loading = false;
+        });
     },
     showEdit(zone) {
       console.log("zone", zone);
       if (zone) {
         this.editedIndex = this.config.zones.indexOf(zone);
         if (zone.dates) {
-          zone.dates = zone.dates.map(date => {
+          zone.dates = zone.dates.map((date) => {
             return new Date(date);
           });
         }
@@ -328,7 +305,7 @@ export default {
         this.config.zones.splice(this.editedIndex, 1, this.editedItem);
       }
       console.log(this.config);
-    }
+    },
   },
   mounted() {
     this.initialize();
@@ -338,14 +315,14 @@ export default {
       if (!this.selectedValue) {
         return {
           type: "is-danger",
-          message: "Date required."
+          message: "Date required.",
         };
       }
       return {
         type: "is-primary",
-        message: ""
+        message: "",
       };
-    }
-  }
+    },
+  },
 };
 </script>
