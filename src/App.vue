@@ -104,7 +104,7 @@
         <b-row class="mt-3">
           <b-col sm="12">
             <b-form-label for="zipcode">Fechas de activacion:</b-form-label>
-            <v-date-picker mode="multiple" v-model="editedItem.dates">
+            <v-date-picker mode="multiple" :min-date="new Date()" v-model="editedItem.dates">
               <b-button>Almanaque</b-button>
             </v-date-picker>
           </b-col>
@@ -142,24 +142,47 @@
 
       <b-row class="mt-3">
         <b-col sm="12">
-          <b-form-label for="paymentMethod" v-if="editedItem.paymentMethod">
-            Métodos de pago ({{
-            editedItem.paymentMethod
-            ? editedItem.paymentMethod.split("\n").length
+          <b-form-label for="brand" v-if="editedItem.brand">
+            Brands ({{
+            editedItem.brand
+            ? editedItem.brand.split("\n").length
             : ""
             }}
             ):
           </b-form-label>
           <b-form-textarea
-            id="paymentMethod"
-            v-model="editedItem.paymentMethod"
-            placeholder="Métodos de pago"
+            id="brand"
+            v-model="editedItem.brand"
+            placeholder="Brand"
             rows="3"
             class="mt-1"
             maax-rows="6"
           ></b-form-textarea>
         </b-col>
       </b-row>
+
+      
+      <b-row class="mt-3">
+        <b-col sm="12">
+          <b-form-label for="symptom" v-if="editedItem.symptom">
+            Symptoms ({{
+            editedItem.symptom
+            ? editedItem.symptom.split("\n").length
+            : ""
+            }}
+            ):
+          </b-form-label>
+          <b-form-textarea
+            id="symptom"
+            v-model="editedItem.symptom"
+            placeholder="symptom"
+            rows="3"
+            class="mt-1"
+            maax-rows="6"
+          ></b-form-textarea>
+        </b-col>
+      </b-row>
+
       <div slot="modal-footer" class="w-100">
         <b-button
           variant="primary"

@@ -16,6 +16,8 @@ Vue.use(VCalendar, {
                // ...other defaults
 });
 import axios from "axios"
+//process.env.NODE_ENV = "development"
+
 const baseURL =
   process.env.NODE_ENV === "development" ? "http://localhost:3333/api" : "/api";
 axios.defaults.baseURL = baseURL
